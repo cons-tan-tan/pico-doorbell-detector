@@ -75,6 +75,11 @@ func main() {
 
 	println("mode:", mode, "-> ntfy topic:", ntfyTopic())
 
+	// ---- ウォッチドッグ ----
+	// sendNtfy のリトライが最大9s掛かりタイムアウト(8s)を超えるため無効化中
+	keepAlive = func() {}
+	hardReset = machine.CPUReset
+
 	// ---- ネットワーク初期化 ----
 
 	if wifiSSID == "" {
@@ -87,11 +92,15 @@ func main() {
 	stack, rstack, err := setupNetwork(dev)
 	if err != nil {
 		println("FATAL: Network setup failed:", err.Error())
-		for {
-			time.Sleep(time.Hour)
-		}
+		hardReset()
 	}
 	println("Network ready")
+
+	// ntfyサーバーのDNS解決
+	if err := resolveNtfy(rstack); err != nil {
+		println("FATAL: DNS lookup failed:", err.Error())
+		hardReset()
+	}
 
 	// ---- ADC初期化 ----
 
@@ -117,6 +126,8 @@ func main() {
 	var frameBuf [detect.FrameSize]float64
 
 	for {
+		keepAlive()
+
 		// 256サンプルを連続収集
 		for i := 0; i < detect.FrameSize; i++ {
 			frameBuf[i] = float64(adc.Get())
@@ -131,9 +142,7 @@ func main() {
 
 		case detect.EventType2Detected:
 			println(">>> DOORBELL TYPE 2 DETECTED <<<")
-			if err := sendNtfy(stack, rstack, msgDoorbellType2); err != nil {
-				println("ntfy failed:", err.Error())
-			}
+			notifyWithRecovery(dev, stack, rstack, msgDoorbellType2)
 			// LED高速点滅（3秒間）
 			for i := 0; i < 30; i++ {
 				dev.GPIOSet(0, i%2 == 0)
@@ -143,9 +152,7 @@ func main() {
 
 		case detect.EventType1Detected:
 			println(">>> DOORBELL TYPE 1 DETECTED <<<")
-			if err := sendNtfy(stack, rstack, msgDoorbellType1); err != nil {
-				println("ntfy failed:", err.Error())
-			}
+			notifyWithRecovery(dev, stack, rstack, msgDoorbellType1)
 			// LED高速点滅（3秒間）
 			for i := 0; i < 30; i++ {
 				dev.GPIOSet(0, i%2 == 0)

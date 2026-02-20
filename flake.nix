@@ -8,7 +8,7 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      vendorHash = "sha256-+AJkOdUPhwBZPYPpvYaWIlqj+X0HTS8LX3loLkUyf9E=";
+      vendorHash = "sha256-QxK6A1XaibOwdElYTNJq0JzJKQ/H5ez3RGy7k7sBLGc=";
     in
     {
       checks.${system}.default = pkgs.buildGoModule {
