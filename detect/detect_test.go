@@ -143,18 +143,13 @@ func TestAnalyzeFrame_Silence(t *testing.T) {
 
 func TestAnalyzeFrame_PureDing(t *testing.T) {
 	coeffs := NewCoefficients(testSampleRate)
-	// 850Hz（基本）+ 2550Hz（第3倍音）、1700Hz（第2倍音）は含めない
-	frame := generateMultiSineFrame(
-		[]float64{freqDingBase, freqDingHarm3},
-		[]float64{0.5, 0.08},
-		testSampleRate,
-	)
+	// 850Hzのみ → Ding=true（倍音不要）
+	frame := generateSineFrame(freqDingBase, testSampleRate, 0.5)
 	RemoveDC(frame)
 	res := AnalyzeFrame(frame, &coeffs)
 
 	if !res.Ding {
-		t.Errorf("Ding=false, want true (R850=%.4f, RHarm=%.4f, RHarm2=%.4f)",
-			res.R850, res.RHarm, res.RHarm2)
+		t.Errorf("Ding=false, want true (R850=%.4f)", res.R850)
 	}
 	if res.Dong {
 		t.Error("Dong=true, want false")
@@ -175,18 +170,6 @@ func TestAnalyzeFrame_PureDong(t *testing.T) {
 	}
 }
 
-func TestAnalyzeFrame_DingWithoutHarmonic(t *testing.T) {
-	coeffs := NewCoefficients(testSampleRate)
-	// 850Hzのみ、第3倍音（2550Hz）なし
-	frame := generateSineFrame(freqDingBase, testSampleRate, 0.5)
-	RemoveDC(frame)
-	res := AnalyzeFrame(frame, &coeffs)
-
-	if res.Ding {
-		t.Errorf("Ding=true without harmonic (RHarm=%.4f)", res.RHarm)
-	}
-}
-
 func TestAnalyzeFrame_UnrelatedFrequency(t *testing.T) {
 	coeffs := NewCoefficients(testSampleRate)
 	frame := generateSineFrame(440, testSampleRate, 0.5)
@@ -203,14 +186,10 @@ func TestAnalyzeFrame_UnrelatedFrequency(t *testing.T) {
 
 // ---- C. Type 2 Detector 状態遷移 ----
 
-// makeDingFrame はDetector.Feedに渡すDingフレームを生成する。
+// makeDingFrame はDetector.Feedに渡すDingフレーム（850Hz）を生成する。
 // Feed内部でRemoveDCが呼ばれるため、DC除去は不要。
 func makeDingFrame() []float64 {
-	return generateMultiSineFrame(
-		[]float64{freqDingBase, freqDingHarm3},
-		[]float64{0.5, 0.08},
-		testSampleRate,
-	)
+	return generateSineFrame(freqDingBase, testSampleRate, 0.5)
 }
 
 // makeDongFrame はDetector.Feedに渡すDongフレームを生成する。
@@ -221,9 +200,9 @@ func makeDongFrame() []float64 {
 func TestDetector_Type2FullSequence(t *testing.T) {
 	d := NewDetector(testSampleRate)
 
-	// Ding フレームを WindowM 回 Feed → EventType2DingDetected
+	// Ding フレームを DingStreakThreshold 回 Feed → EventType2DingDetected
 	var dingDetected bool
-	for range WindowM {
+	for range DingStreakThreshold {
 		event, _ := d.Feed(makeDingFrame())
 		if event == EventType2DingDetected {
 			dingDetected = true
@@ -258,7 +237,7 @@ func TestDetector_Type2Timeout(t *testing.T) {
 	d := NewDetector(testSampleRate)
 
 	// Ding 検出
-	for range WindowM {
+	for range DingStreakThreshold {
 		d.Feed(makeDingFrame())
 	}
 
@@ -277,7 +256,7 @@ func TestDetector_Type2Timeout(t *testing.T) {
 
 	// タイムアウト後にIDLEに戻り、再度Dingが検出できること
 	var dingDetected bool
-	for range WindowM {
+	for range DingStreakThreshold {
 		event, _ := d.Feed(makeDingFrame())
 		if event == EventType2DingDetected {
 			dingDetected = true
@@ -292,7 +271,7 @@ func TestDetector_Type2DongTooEarly(t *testing.T) {
 	d := NewDetector(testSampleRate)
 
 	// Ding 検出
-	for range WindowM {
+	for range DingStreakThreshold {
 		d.Feed(makeDingFrame())
 	}
 
@@ -309,7 +288,7 @@ func TestDetector_Type2ResetAfterDetection(t *testing.T) {
 	d := NewDetector(testSampleRate)
 
 	// 1回目の検出
-	for range WindowM {
+	for range DingStreakThreshold {
 		d.Feed(makeDingFrame())
 	}
 	for range Type2DongMinFrames {
@@ -328,7 +307,7 @@ func TestDetector_Type2ResetAfterDetection(t *testing.T) {
 
 	// 2回目の検出
 	var dingDetected bool
-	for range WindowM {
+	for range DingStreakThreshold {
 		event, _ := d.Feed(makeDingFrame())
 		if event == EventType2DingDetected {
 			dingDetected = true
@@ -393,7 +372,7 @@ func TestIntegration_VoiceWAV(t *testing.T) {
 
 func TestAnalyzeFrame_HighTone(t *testing.T) {
 	coeffs := NewCoefficients(testSampleRate)
-	// 850Hzのみ（倍音なし）→ HighTone=true, Ding=false
+	// 850Hzのみ → HighTone=true, Ding=true
 	frame := generateSineFrame(freqDingBase, testSampleRate, 0.5)
 	RemoveDC(frame)
 	res := AnalyzeFrame(frame, &coeffs)
@@ -404,8 +383,8 @@ func TestAnalyzeFrame_HighTone(t *testing.T) {
 	if res.LowTone {
 		t.Error("LowTone=true, want false")
 	}
-	if res.Ding {
-		t.Error("Ding=true, want false (no harmonic)")
+	if !res.Ding {
+		t.Errorf("Ding=false, want true (R850=%.4f)", res.R850)
 	}
 }
 

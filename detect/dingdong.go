@@ -2,16 +2,23 @@ package detect
 
 // Type 2: 850Hz持続→662Hz持続の2段階パターン（ピーンポーン）
 //
-//	[IDLE] → Ding検出(3-of-5) → [DING_DETECTED] → Dong検出(3-of-5) → [DETECTED]
+//	[IDLE] → Ding連続8フレーム → [DING_DETECTED] → Dong検出(3-of-5) → [DETECTED]
 //	                                    |
 //	                              タイムアウト(1.5s) → [IDLE]
 
-// ---- スライディングウィンドウ ----
+// ---- Dong検出のスライディングウィンドウ ----
 
 const (
 	WindowN = 3 // 最低検出回数
 	WindowM = 5 // ウィンドウ幅
 )
+
+// ---- Ding検出の連続フレーム閾値 ----
+//
+// Type 1のHIGH区間は4-5フレーム、Type 2のDing区間は15-16フレーム。
+// 8フレーム以上の連続でType 2のDingと判定する。
+
+const DingStreakThreshold = 8
 
 // ---- Dong検出の時間制約（フレーム数）----
 // 1フレーム = 256サンプル ≈ 32ms（8kHz時）
@@ -24,9 +31,8 @@ const (
 // ---- 比率ベース閾値（音量非依存）----
 
 const (
-	dingRatioThreshold     = 0.25 // 850/RMS
-	dongRatioThreshold     = 0.20 // 662/RMS
-	harmonicRatioThreshold = 0.03 // 2550/850
+	dingRatioThreshold = 0.25 // 850/RMS
+	dongRatioThreshold = 0.20 // 662/RMS
 )
 
 // ---- 検出状態 ----
@@ -36,22 +42,21 @@ const (
 	stateDingDetected = 1
 )
 
-// Type 2のスライディングウィンドウ＋状態遷移処理。
+// Type 2の連続Dingストリーク＋Dongスライディングウィンドウ＋状態遷移処理。
 func (d *Detector) feedDingDong(res *FrameResult) Event {
-	d.dingWindow[d.frameIdx%WindowM] = res.Ding
-	d.dongWindow[d.frameIdx%WindowM] = res.Dong
-	d.frameIdx++
-
-	if d.frameIdx < WindowM {
-		return EventNone
-	}
-
-	dingCount := countWindow(&d.dingWindow)
-	dongCount := countWindow(&d.dongWindow)
+	// Dong用スライディングウィンドウは常に更新
+	d.dongWindow[d.dongFrameIdx%WindowM] = res.Dong
+	d.dongFrameIdx++
 
 	switch d.state {
 	case stateIdle:
-		if dingCount >= WindowN {
+		// Ding連続カウント
+		if res.Ding {
+			d.dingStreak++
+		} else {
+			d.dingStreak = 0
+		}
+		if d.dingStreak >= DingStreakThreshold {
 			d.state = stateDingDetected
 			d.framesSinceDing = 0
 			return EventType2DingDetected
@@ -62,9 +67,12 @@ func (d *Detector) feedDingDong(res *FrameResult) Event {
 
 		if d.framesSinceDing > Type2DongMaxFrames {
 			d.state = stateIdle
+			d.dingStreak = 0
 			return EventType2Timeout
 		}
-		if d.framesSinceDing >= Type2DongMinFrames && dongCount >= WindowN {
+
+		dongCount := countWindow(&d.dongWindow)
+		if d.dongFrameIdx >= WindowM && d.framesSinceDing >= Type2DongMinFrames && dongCount >= WindowN {
 			d.reset()
 			return EventType2Detected
 		}
@@ -76,9 +84,9 @@ func (d *Detector) feedDingDong(res *FrameResult) Event {
 func (d *Detector) resetDingDong() {
 	d.state = stateIdle
 	d.framesSinceDing = 0
-	d.frameIdx = 0
-	for i := range d.dingWindow {
-		d.dingWindow[i] = false
+	d.dingStreak = 0
+	d.dongFrameIdx = 0
+	for i := range d.dongWindow {
 		d.dongWindow[i] = false
 	}
 }
