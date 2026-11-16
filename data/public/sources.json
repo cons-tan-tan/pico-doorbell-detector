@@ -1,0 +1,16 @@
+{
+  "esc50": {
+    "revision": "33c8ce9eb2cf0b1c2f8bcf322eb349b6be34dbb6",
+    "archive": "https://codeload.github.com/karolpiczak/ESC-50/zip/33c8ce9eb2cf0b1c2f8bcf322eb349b6be34dbb6",
+    "prefix": "ESC-50-33c8ce9eb2cf0b1c2f8bcf322eb349b6be34dbb6/audio/"
+  },
+  "fsd50k": {
+    "record": "https://zenodo.org/records/4060432",
+    "selection_seed": 20261116,
+    "selection": "Official eval subset; custom uploader-disjoint train/val/test split; known ESC-50 sources and uploaders, explicit doorbells excluded",
+    "parts": [
+      {"url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.z01/content", "size": 3221225472},
+      {"url": "https://zenodo.org/api/records/4060432/files/FSD50K.eval_audio.zip/content", "size": 3037675767}
+    ]
+  }
+}

@@ -1,0 +1,372 @@
+{
+  "format": {
+    "sample_rate": 8000,
+    "channels": 1,
+    "subtype": "FLOAT"
+  },
+  "conversion": "Existing load_audio output, stored without further quantization; no gain or denoising",
+  "originals_retained": false,
+  "sessions": {
+    "phone-session-02": {
+      "group": "phone-session-02",
+      "split": "train",
+      "device": "smartphone",
+      "placement": "not yet confirmed",
+      "sources": [
+        {
+          "original": "doorbell_type1.m4a",
+          "original_sha256": "8e6a54fed24a96b6f8435519df9e42dcb684259d671dfc750be7d3cf7361e83d",
+          "wav": "doorbell_type1.wav",
+          "wav_sha256": "c1f5fdf20ae86646aafde90cce953a0228bdaf5528468c4c0ad43b7070ba241f",
+          "sample_rate": 48000,
+          "channels": 2,
+          "decoded_samples": 520192,
+          "conversion": "ffmpeg -i ORIGINAL -map 0:a:0 -c:a pcm_s24le WAV; no gain, denoising or resampling",
+          "decode_warning": "One empty ALAC packet (4096 nominal samples) cannot be decoded; decoded PCM retained without padding.",
+          "originals_retained": false,
+          "historical_crops": [
+            {
+              "path": "clips/doorbell_type1-01-left.wav",
+              "sha256": "272fa908a59430c08c1599d8ddb743bd9bc96e247c854acebc850639196de377",
+              "start_sample": 73440,
+              "stop_sample": 225600,
+              "channel": 0
+            },
+            {
+              "path": "clips/doorbell_type1-01-right.wav",
+              "sha256": "4aca94c3d5a03cc5c13208b6a281f2ae570abc99f10300e48d17ca26a28ee0c1",
+              "start_sample": 73440,
+              "stop_sample": 225600,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type1-02-left.wav",
+              "sha256": "33af9cee1e4da15cecbc8413f55f287bdcbabab785ebc38d4cf435241f07bcb5",
+              "start_sample": 225600,
+              "stop_sample": 378240,
+              "channel": 0
+            },
+            {
+              "path": "clips/doorbell_type1-02-right.wav",
+              "sha256": "6ebeb8bc2c655e4e316f33ff409b8b7c00ebac5224d163bb9a578783bf5ef972",
+              "start_sample": 225600,
+              "stop_sample": 378240,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type1-03-left.wav",
+              "sha256": "35e7ee16288d52d145fb417f89acd3a5d201871e0a4dffcfd32c9c4340847303",
+              "start_sample": 378240,
+              "stop_sample": 519840,
+              "channel": 0
+            },
+            {
+              "path": "clips/doorbell_type1-03-right.wav",
+              "sha256": "07caaf8378700ddceeec0840c08740ffc7f6a660ba745419f6275948d24f7af1",
+              "start_sample": 378240,
+              "stop_sample": 519840,
+              "channel": 1
+            }
+          ]
+        },
+        {
+          "original": "doorbell_type2.m4a",
+          "original_sha256": "aeffb4cd0a14c64252fe6013b065088f0e6aa58199c2f276e0b1360086720acb",
+          "wav": "doorbell_type2.wav",
+          "wav_sha256": "1da3bc3f1b182ff8310115e994d2ea46f2a028ea3f3cb73a80c94caa13f32b2d",
+          "sample_rate": 48000,
+          "channels": 2,
+          "decoded_samples": 704512,
+          "conversion": "ffmpeg -i ORIGINAL -map 0:a:0 -c:a pcm_s24le WAV; no gain, denoising or resampling",
+          "decode_warning": "One empty ALAC packet (4096 nominal samples) cannot be decoded; decoded PCM retained without padding.",
+          "placement": "Phone-to-intercom distance changed during the take; later clarified by user",
+          "originals_retained": false,
+          "historical_crops": [
+            {
+              "path": "clips/doorbell_type2-01-left.wav",
+              "sha256": "5a86662a8807b1035574c0d3d8e5cf987df0bbb4317a1507d877d0015788ac40",
+              "start_sample": 124800,
+              "stop_sample": 277440,
+              "channel": 0
+            },
+            {
+              "path": "clips/doorbell_type2-01-right.wav",
+              "sha256": "7bd379b6094a9769c6095a55c0f1c1013c2b4c08afffa73d7dfe9eea2cabcd8f",
+              "start_sample": 124800,
+              "stop_sample": 277440,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type2-02-left.wav",
+              "sha256": "ac7691aa612f3b83302b0ac8de24d2835be07a7e3f0c03d96ef74b83a2e1723f",
+              "start_sample": 277440,
+              "stop_sample": 429600,
+              "channel": 0
+            },
+            {
+              "path": "clips/doorbell_type2-02-right.wav",
+              "sha256": "51ecf0b6161f1ffbcdbda10f8a8f475ae45bac9c85c81952ffe29c0e798be9bf",
+              "start_sample": 277440,
+              "stop_sample": 429600,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type2-03-left.wav",
+              "sha256": "e9a418e2c7411342a06bfee274f3adc79285463cf7d50cf83bb72f7720e5e5f8",
+              "start_sample": 429600,
+              "stop_sample": 583200,
+              "channel": 0
+            },
+            {
+              "path": "clips/doorbell_type2-03-right.wav",
+              "sha256": "01c5abcd594497a0c9c03ff46dee65d9a97590e7f51f78b604c6d360eca86b9a",
+              "start_sample": 429600,
+              "stop_sample": 583200,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type2-04-left.wav",
+              "sha256": "3c14a9372bc121152d1741187d03b7be3cd8b58d73db4f9acd82cf18a59edf48",
+              "start_sample": 583200,
+              "stop_sample": 704160,
+              "channel": 0
+            },
+            {
+              "path": "clips/doorbell_type2-04-right.wav",
+              "sha256": "0d31e39b44caac652c2612a8a388a09ebe2fc22c3eab3ca749fd50f9b135a11a",
+              "start_sample": 583200,
+              "stop_sample": 704160,
+              "channel": 1
+            }
+          ]
+        }
+      ]
+    },
+    "phone-session-03": {
+      "group": "phone-session-03",
+      "split": "train",
+      "device": "smartphone",
+      "placement": "Close to the intercom from the beginning; user report; distance not measured",
+      "sources": [
+        {
+          "original": "doorbell_type2.m4a",
+          "imported_from": "testdata/type2.m4a",
+          "original_sha256": "128022c9c210b18de011de1e90763aef01433728b672d1cbbd7fcb3348ff368f",
+          "wav": "doorbell_type2.wav",
+          "wav_sha256": "441d1b02579500190e350ccdb1eaa302b4a32cca333b0472fdc5295d7dc40374",
+          "sample_rate": 48000,
+          "channels": 2,
+          "decoded_samples": 610304,
+          "conversion": "ffmpeg -i ORIGINAL -map 0:a:0 -c:a pcm_s24le WAV; no gain, denoising or resampling",
+          "decode_warning": "One empty ALAC packet (4096 nominal samples) cannot be decoded; decoded PCM retained without padding",
+          "channel_selection": "Right channel: stronger chime relative to background and stable tone level across four repetitions",
+          "originals_retained": false,
+          "historical_crops": [
+            {
+              "path": "clips/doorbell_type2-01-right.wav",
+              "sha256": "903ef535f317e593189deeee207c58ee3a3c50b4c81a1b2264719fdccf7e313f",
+              "start_sample": 29760,
+              "stop_sample": 182400,
+              "attack_sample": 34560,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type2-02-right.wav",
+              "sha256": "58a46a7ffaf522b0f2609da70185dc427bf45c9a1bf210e0bd420fc5482f9042",
+              "start_sample": 182400,
+              "stop_sample": 335040,
+              "attack_sample": 187200,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type2-03-right.wav",
+              "sha256": "8ceb38c91ecdf7ac18afee9558990e9436dea0e76fe58db1e3f6587d1676bca1",
+              "start_sample": 335040,
+              "stop_sample": 487680,
+              "attack_sample": 339840,
+              "channel": 1
+            },
+            {
+              "path": "clips/doorbell_type2-04-right.wav",
+              "sha256": "e065732ce5cdc9ac681a9f1be00c82cb06ebeaa301497328c621dc7b819a6290",
+              "start_sample": 487680,
+              "stop_sample": 610304,
+              "attack_sample": 492480,
+              "channel": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "clips": [
+    {
+      "path": "repository-recordings/doorbell_type1.wav",
+      "sha256": "2dd48a0a7063363c18388b882597436938b9a54d57696007368c973346afe2e3",
+      "previous_path": "testdata/doorbell_type1.wav",
+      "previous_sha256": "46e4ede4f05a14530fcf6ca730eedcfefb0a282ff31df71c759f6ac9a386a73c",
+      "samples": 44860,
+      "group": "repository-recordings"
+    },
+    {
+      "path": "repository-recordings/doorbell_type2.wav",
+      "sha256": "6c41d1a6404e30fc750fb640cba277017dabadeaf82b97f2d847c0ecd05cbfb8",
+      "previous_path": "testdata/doorbell_type2.wav",
+      "previous_sha256": "bf638807b0d9d9a5a25d1b771d5294e89eb23c24d4ca17d7ead1a212e1fc7484",
+      "samples": 16000,
+      "group": "repository-recordings"
+    },
+    {
+      "path": "repository-recordings/voice.wav",
+      "sha256": "13f095265d493b350986d338cda5f60ac031833b842956a2e566bacb9f8a7449",
+      "previous_path": "testdata/voice.wav",
+      "previous_sha256": "bbf6c8d663be31c56b2648c8ad9e59e208a1f0d93e778c2f8876dc3906dba4c8",
+      "samples": 9899,
+      "group": "repository-recordings"
+    },
+    {
+      "path": "phone-session-02/doorbell_type1-01-left.wav",
+      "sha256": "50611723a137f88b7d05f0ed92c7d7b88bbae69d433011fbd2fc790648a452d3",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type1-01-left.wav",
+      "previous_sha256": "272fa908a59430c08c1599d8ddb743bd9bc96e247c854acebc850639196de377",
+      "samples": 25360,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type1-01-right.wav",
+      "sha256": "647cdf3de8534bdebec123c8eebf972faa90e004e59c36e353adfdd01ab44892",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type1-01-right.wav",
+      "previous_sha256": "4aca94c3d5a03cc5c13208b6a281f2ae570abc99f10300e48d17ca26a28ee0c1",
+      "samples": 25360,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type1-02-left.wav",
+      "sha256": "1b5c3361d36b6ccdf719e9b7dd3f537397f28e9e6678585461589140b4ae0baf",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type1-02-left.wav",
+      "previous_sha256": "33af9cee1e4da15cecbc8413f55f287bdcbabab785ebc38d4cf435241f07bcb5",
+      "samples": 25440,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type1-02-right.wav",
+      "sha256": "ec52f216907def77be0c94ff2607e032cdcc9899331a767676d3ecc4ea1eff28",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type1-02-right.wav",
+      "previous_sha256": "6ebeb8bc2c655e4e316f33ff409b8b7c00ebac5224d163bb9a578783bf5ef972",
+      "samples": 25440,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type1-03-left.wav",
+      "sha256": "3a8a06fd06b5781bf69a9c2cfcebb10781d9f465190d9b53b7eb37527b11b769",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type1-03-left.wav",
+      "previous_sha256": "35e7ee16288d52d145fb417f89acd3a5d201871e0a4dffcfd32c9c4340847303",
+      "samples": 23600,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type1-03-right.wav",
+      "sha256": "bec13e4e842df1e498b2cd465953f6a6188847ae8ef371c2d360c0b141544738",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type1-03-right.wav",
+      "previous_sha256": "07caaf8378700ddceeec0840c08740ffc7f6a660ba745419f6275948d24f7af1",
+      "samples": 23600,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-01-left.wav",
+      "sha256": "4b741cdb0c8d1dd639c503a016b1184bd1bcad08eeb042732b6a2ee27a3fe041",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-01-left.wav",
+      "previous_sha256": "5a86662a8807b1035574c0d3d8e5cf987df0bbb4317a1507d877d0015788ac40",
+      "samples": 25440,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-01-right.wav",
+      "sha256": "f00823a725a57283d7cfb9af1e2fb4f3fcfb5e3af135ed1c38c7556418f854c3",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-01-right.wav",
+      "previous_sha256": "7bd379b6094a9769c6095a55c0f1c1013c2b4c08afffa73d7dfe9eea2cabcd8f",
+      "samples": 25440,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-02-left.wav",
+      "sha256": "87c466cd69b98239fa7bff9f957a96f8fdb8c8530ad728c0a43a1402c84301b9",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-02-left.wav",
+      "previous_sha256": "ac7691aa612f3b83302b0ac8de24d2835be07a7e3f0c03d96ef74b83a2e1723f",
+      "samples": 25360,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-02-right.wav",
+      "sha256": "1f55ada1489f747ff3fe924778d83ba8ef036955ed51e763e8464eeed796e3f6",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-02-right.wav",
+      "previous_sha256": "51ecf0b6161f1ffbcdbda10f8a8f475ae45bac9c85c81952ffe29c0e798be9bf",
+      "samples": 25360,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-03-left.wav",
+      "sha256": "10deca168f0bc538d0a86e65318428a9d531ac8967bd5d971f1f36546476ffb1",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-03-left.wav",
+      "previous_sha256": "e9a418e2c7411342a06bfee274f3adc79285463cf7d50cf83bb72f7720e5e5f8",
+      "samples": 25600,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-03-right.wav",
+      "sha256": "a0f22da71e7eaa889f5eae8e7fad15ad6ffdd784bd1de9f5763aa960a302e85b",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-03-right.wav",
+      "previous_sha256": "01c5abcd594497a0c9c03ff46dee65d9a97590e7f51f78b604c6d360eca86b9a",
+      "samples": 25600,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-04-left.wav",
+      "sha256": "0d9eab75fb4d1de8159646eee5ed427b36bbe29de363f17c92309bdb331f530e",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-04-left.wav",
+      "previous_sha256": "3c14a9372bc121152d1741187d03b7be3cd8b58d73db4f9acd82cf18a59edf48",
+      "samples": 20160,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-02/doorbell_type2-04-right.wav",
+      "sha256": "455655ae704da8b99da494a0de229a854744fc451312ba237ae655fc28e7f397",
+      "previous_path": "testdata/phone-session-02/clips/doorbell_type2-04-right.wav",
+      "previous_sha256": "0d31e39b44caac652c2612a8a388a09ebe2fc22c3eab3ca749fd50f9b135a11a",
+      "samples": 20160,
+      "group": "phone-session-02"
+    },
+    {
+      "path": "phone-session-03/doorbell_type2-01-right.wav",
+      "sha256": "7689923f49abb3693329e1d6b6fe5afb148e7c626a4fd466eefade0b85a24b9e",
+      "previous_path": "testdata/phone-session-03/clips/doorbell_type2-01-right.wav",
+      "previous_sha256": "903ef535f317e593189deeee207c58ee3a3c50b4c81a1b2264719fdccf7e313f",
+      "samples": 25440,
+      "group": "phone-session-03"
+    },
+    {
+      "path": "phone-session-03/doorbell_type2-02-right.wav",
+      "sha256": "ddd7c064de5cb28c928f0babc371b92adc28122c53b3fbf97b4c3a4a99539c19",
+      "previous_path": "testdata/phone-session-03/clips/doorbell_type2-02-right.wav",
+      "previous_sha256": "58a46a7ffaf522b0f2609da70185dc427bf45c9a1bf210e0bd420fc5482f9042",
+      "samples": 25440,
+      "group": "phone-session-03"
+    },
+    {
+      "path": "phone-session-03/doorbell_type2-03-right.wav",
+      "sha256": "e6893456afe0741387d7100b42d7f4a196f0f83f8a99db2568887f297c2887f0",
+      "previous_path": "testdata/phone-session-03/clips/doorbell_type2-03-right.wav",
+      "previous_sha256": "8ceb38c91ecdf7ac18afee9558990e9436dea0e76fe58db1e3f6587d1676bca1",
+      "samples": 25440,
+      "group": "phone-session-03"
+    },
+    {
+      "path": "phone-session-03/doorbell_type2-04-right.wav",
+      "sha256": "caec311f08ff20c5c24439b34cf5867a8048359e5d2e7fff4d842dd547ac9597",
+      "previous_path": "testdata/phone-session-03/clips/doorbell_type2-04-right.wav",
+      "previous_sha256": "e065732ce5cdc9ac681a9f1be00c82cb06ebeaa301497328c621dc7b819a6290",
+      "samples": 20438,
+      "group": "phone-session-03"
+    }
+  ]
+}

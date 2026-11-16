@@ -1,0 +1,201 @@
+{
+  "seed": 42,
+  "soundfont": "FluidR3_GM2-2.sf2",
+  "soundfont_sha256": "2ae766ab5c5deb6f7fffacd6316ec9f3699998cce821df3163e7b10a78a64066",
+  "soundfont_license": "MIT",
+  "files": [
+    {
+      "file": "instrument-00000.wav",
+      "program": 0
+    },
+    {
+      "file": "instrument-00001.wav",
+      "program": 4
+    },
+    {
+      "file": "instrument-00002.wav",
+      "program": 10
+    },
+    {
+      "file": "instrument-00003.wav",
+      "program": 11
+    },
+    {
+      "file": "instrument-00004.wav",
+      "program": 24
+    },
+    {
+      "file": "instrument-00005.wav",
+      "program": 25
+    },
+    {
+      "file": "instrument-00006.wav",
+      "program": 26
+    },
+    {
+      "file": "instrument-00007.wav",
+      "program": 27
+    },
+    {
+      "file": "instrument-00008.wav",
+      "program": 28
+    },
+    {
+      "file": "instrument-00009.wav",
+      "program": 29
+    },
+    {
+      "file": "instrument-00010.wav",
+      "program": 80
+    },
+    {
+      "file": "instrument-00011.wav",
+      "program": 81
+    },
+    {
+      "file": "instrument-00012.wav",
+      "program": 0
+    },
+    {
+      "file": "instrument-00013.wav",
+      "program": 4
+    },
+    {
+      "file": "instrument-00014.wav",
+      "program": 10
+    },
+    {
+      "file": "instrument-00015.wav",
+      "program": 11
+    },
+    {
+      "file": "instrument-00016.wav",
+      "program": 24
+    },
+    {
+      "file": "instrument-00017.wav",
+      "program": 25
+    },
+    {
+      "file": "instrument-00018.wav",
+      "program": 26
+    },
+    {
+      "file": "instrument-00019.wav",
+      "program": 27
+    },
+    {
+      "file": "instrument-00020.wav",
+      "program": 28
+    },
+    {
+      "file": "instrument-00021.wav",
+      "program": 29
+    },
+    {
+      "file": "instrument-00022.wav",
+      "program": 80
+    },
+    {
+      "file": "instrument-00023.wav",
+      "program": 81
+    },
+    {
+      "file": "instrument-00024.wav",
+      "program": 0
+    },
+    {
+      "file": "instrument-00025.wav",
+      "program": 4
+    },
+    {
+      "file": "instrument-00026.wav",
+      "program": 10
+    },
+    {
+      "file": "instrument-00027.wav",
+      "program": 11
+    },
+    {
+      "file": "instrument-00028.wav",
+      "program": 24
+    },
+    {
+      "file": "instrument-00029.wav",
+      "program": 25
+    },
+    {
+      "file": "instrument-00030.wav",
+      "program": 26
+    },
+    {
+      "file": "instrument-00031.wav",
+      "program": 27
+    },
+    {
+      "file": "instrument-00032.wav",
+      "program": 28
+    },
+    {
+      "file": "instrument-00033.wav",
+      "program": 29
+    },
+    {
+      "file": "instrument-00034.wav",
+      "program": 80
+    },
+    {
+      "file": "instrument-00035.wav",
+      "program": 81
+    },
+    {
+      "file": "instrument-00036.wav",
+      "program": 0
+    },
+    {
+      "file": "instrument-00037.wav",
+      "program": 4
+    },
+    {
+      "file": "instrument-00038.wav",
+      "program": 10
+    },
+    {
+      "file": "instrument-00039.wav",
+      "program": 11
+    },
+    {
+      "file": "instrument-00040.wav",
+      "program": 24
+    },
+    {
+      "file": "instrument-00041.wav",
+      "program": 25
+    },
+    {
+      "file": "instrument-00042.wav",
+      "program": 26
+    },
+    {
+      "file": "instrument-00043.wav",
+      "program": 27
+    },
+    {
+      "file": "instrument-00044.wav",
+      "program": 28
+    },
+    {
+      "file": "instrument-00045.wav",
+      "program": 29
+    },
+    {
+      "file": "instrument-00046.wav",
+      "program": 80
+    },
+    {
+      "file": "instrument-00047.wav",
+      "program": 81
+    }
+  ],
+  "retention": "Rendered WAVs are fixed training inputs; MIDI files and intermediate renders are disposable."
+}
