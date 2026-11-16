@@ -1,0 +1,72 @@
+{
+  "input": {
+    "shape": [
+      1,
+      124,
+      20,
+      1
+    ],
+    "dtype": "int8",
+    "scale": 0.0027597732841968536,
+    "zero_point": -128
+  },
+  "output": {
+    "shape": [
+      1,
+      3
+    ],
+    "dtype": "int8",
+    "scale": 0.00390625,
+    "zero_point": -128
+  },
+  "frontend": {
+    "sample_rate": 8000,
+    "window_samples": 16000,
+    "frame_samples": 256,
+    "hop_samples": 128,
+    "mel_bins": 20,
+    "low_hz": 80.0,
+    "high_hz": 3800.0,
+    "log_floor": -10.0,
+    "compression": "log",
+    "pcen_alpha": 0.98,
+    "pcen_delta": 2.0,
+    "pcen_root": 0.5,
+    "pcen_smooth": 0.04,
+    "pcen_epsilon": 1e-10,
+    "pcen_scale": 4.0
+  },
+  "labels": [
+    "background",
+    "doorbell_type1",
+    "doorbell_type2"
+  ],
+  "policy": {
+    "threshold": 0.98,
+    "consecutive": 1,
+    "hop_seconds": 0.256,
+    "cooldown_seconds": 10.0,
+    "fusion": {
+      "low": 0.9,
+      "high": 0.98,
+      "confirmation_frames": 3,
+      "use_rules": true,
+      "cooldown_seconds": 10.0,
+      "rule_hold_ms": 1280,
+      "minimum_support": 2
+    }
+  },
+  "decision_sha256": "bcb0f67985d379a94bfb6dff29c94b9a83ada4dbb11b636bff54c92c90e777e8",
+  "sha256": {
+    "model.tflite": "9b37c878aed9cc4b3fa5ecd3f60c9e32cca32cd316cad3997f0299a407f98e5e",
+    "hann.f32": "871d0d64593e786232dc3cc13017006bbef2be712282dc911bb3877b4b2ac8f1",
+    "mel.f32": "4ca90d1d8e7e60a60ff6853400c1ca975f7f9f96c5c3b54e05f6d8d86634e3d4",
+    "reference-pcm.f32": "ed264237533efa371ea0515c9e2cb0cae506e32010cff9676e4bb33d29ad9b1b",
+    "reference-features.f32": "9555692fc9d091e605a2d28210216e6b40c6ca2d04320bcae2c80b8b48801368",
+    "reference-input.i8": "16d94d0a66b159d04c472cda0ca8eeb22588daf63fdc1c38a8347db7d8b950f6",
+    "reference-output.i8": "6f9e2d20bf551fec53a96040008d8b035e3463e291fc9c172eb9a43feceede3c"
+  },
+  "pico_verified": false,
+  "reference_runtime": "litert_builtin_reference",
+  "source_reference_max_probability_difference": 0.0
+}

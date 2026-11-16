@@ -1,0 +1,61 @@
+[package]
+name = "doorbell-firmware"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[features]
+device = []
+
+[[bin]]
+name = "doorbell"
+path = "src/main.rs"
+required-features = ["device"]
+test = false
+bench = false
+
+[dependencies]
+libm = "0.2"
+microfft = { version = "0.6", default-features = false, features = ["size-256"] }
+portable-atomic = { version = "1", features = ["critical-section"] }
+log = "0.4"
+crypto_box = { version = "0.9.1", default-features = false, features = ["salsa20"] }
+blake2 = { version = "0.10", default-features = false }
+zeroize = { version = "1", default-features = false }
+
+[target.'cfg(target_os = "none")'.dependencies]
+embassy-executor = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+embassy-rp = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26", features = ["rp235xa", "time-driver", "critical-section-impl", "unstable-pac", "executor-thread"] }
+embassy-time = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+embassy-net = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26", features = ["tcp", "dns", "ipv4", "medium-ethernet"] }
+embassy-usb = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+embassy-usb-logger = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+cyw43 = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+cyw43-pio = { git = "https://github.com/embassy-rs/embassy", rev = "e23bc27945d76f94a4051b2f96ccd08dc7abdb26" }
+cortex-m = { version = "0.7", features = ["inline-asm"] }
+cortex-m-rt = "0.7"
+critical-section = "1.2"
+static_cell = "2.1"
+heapless = "0.9"
+embedded-io-async = "0.7"
+
+[build-dependencies]
+cc = "1"
+serde_json = "1"
+sha2 = "0.10"
+
+[dev-dependencies]
+serde_json = "1"
+sha2 = "0.10"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+debug = 1
+panic = "abort"
+
+[profile.dev]
+opt-level = 2
