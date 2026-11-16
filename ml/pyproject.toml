@@ -1,0 +1,33 @@
+[project]
+name = "pico-doorbell-detector"
+version = "0.1.0"
+description = "Local audio model training and validation tools for the Pico doorbell detector"
+# TensorFlow 2.21 has no wheels for Python 3.14 or later.
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "ai-edge-litert>=2.3,<2.4",
+    "librosa>=0.11,<0.12",
+    "mido>=1.3,<2",
+    "numpy>=2,<3",
+    "scaper>=1.6.5,<1.7",
+    "scipy>=1.15,<2",
+    "soundfile>=0.13,<0.14",
+    "tensorflow>=2.21,<2.22",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "tensorflow[and-cuda]>=2.21,<2.22; sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/doorbell_ml"]
+
+[tool.uv]
+# LiteRT requires this backport unconditionally, but 1.3.x declares Python <3.11.
+# https://github.com/astral-sh/uv/issues/22486
+constraint-dependencies = ["backports-strenum<1.3"]

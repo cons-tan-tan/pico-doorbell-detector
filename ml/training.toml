@@ -1,0 +1,39 @@
+version = 1
+manifests = [
+  "../data/recordings.csv",
+  "../data/public/esc50.csv",
+  "../data/public/fsd50k.csv",
+  "../data/synthetic/manifest.csv",
+]
+
+[train]
+channels = [16, 24, 32]
+compression = "log"
+seed = 42
+device = "cpu"
+batch_size = 32
+examples_per_class = 768
+validation_per_class = 128
+background_multiplier = 4
+synthetic_fraction = 0.25
+time_shift_seconds = 0.5
+soundscape_fraction = 0.25
+min_snr_db = -5
+time_mask_frames = 8
+frequency_mask_bins = 1
+mask_probability = 0.25
+filter_probability = 0.0
+max_model_bytes = 65536
+
+[base]
+epochs = 36
+learning_rate = 0.001
+
+[mine]
+count = 256
+hop_seconds = 0.256
+
+[refine]
+epochs = 20
+learning_rate = 0.0001
+hard_negative_fraction = 0.6
