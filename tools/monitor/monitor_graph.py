@@ -17,6 +17,7 @@ SCORES = re.compile(
     r"Scores background=([\d.+-]+)%; entrance=([\d.+-]+)%; door=([\d.+-]+)%$"
 )
 SERIES = (("background", "cyan"), ("entrance", "green"), ("door", "magenta"))
+REQUEST_COLOR = 11  # ANSI bright yellow
 
 
 class Scores:
@@ -131,8 +132,8 @@ def render(state, width, height, now):
                 x, [point[1][index] for point in points], color=color, marker="braille"
             )
     for x in state.request_offsets(now):
-        plt.vertical_line(x, color="yellow")
-        plt.text("N", x, 100, color="yellow", style="bold")
+        plt.vertical_line(x, color=REQUEST_COLOR)
+        plt.text("N", x, 100, color=REQUEST_COLOR, style="bold")
     return "\n".join((header, percentages, plt.build().rstrip("\n")))
 
 
@@ -149,8 +150,8 @@ def main():
             width, height = os.get_terminal_size()
             # tio timestamps every line with the host's local clock.
             frame = render(state, width, height, datetime.now())
-            # Repaint the private tmux pane in place, including after a resize.
-            print(f"\x1b[H{frame}\x1b[J", end="", flush=True)
+            # Erase the previous frame first when a score or the pane shrinks.
+            print(f"\x1b[H\x1b[J{frame}", end="", flush=True)
             time.sleep(0.2)
 
 

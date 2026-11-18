@@ -241,6 +241,12 @@ class SerialRunners(unittest.TestCase):
         )
         self.assertEqual(re.findall(r"Event \d+", self.capture_pane(1)), earlier)
         self.assertIn("entrance=70%", self.log.read_text())
+        os.write(self.serial, b"Scores background=91%; entrance=6%; door=3%\r\n")
+        self.wait_for(lambda: "background: 91.0%" in self.capture_pane(0))
+        self.assertEqual(
+            self.capture_pane(0).splitlines()[1].rstrip(),
+            "background: 91.0%  entrance: 6.0%  door: 3.0%",
+        )
         self.assertIn("through the running monitor", self.request_bootsel())
         socket = next(self.root.rglob("*.tmux"))
         subprocess.run(

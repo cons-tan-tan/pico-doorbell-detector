@@ -55,6 +55,9 @@ class ScoreTests(unittest.TestCase):
         )
         self.assertEqual(list(state.request_offsets(at(5.25))), [-3.25, -0.25])
         self.assertEqual(state.curves(at(5.25))[0][0][0], -5.25)
+        chart = render(state, 80, 12, at(5.25))
+        self.assertIn("\x1b[38;5;11m\x1b[1mN", chart)
+        self.assertIn("\x1b[38;5;11m│", chart)
         self.assertEqual(list(state.request_offsets(at(63))), [-58])
         self.assertEqual(list(state.request_offsets(at(66))), [])
 
