@@ -19,6 +19,7 @@ impl ReceiverHandler for Commands {
             let command = self.parser.lock(|parser| parser.borrow_mut().push(*byte));
             match command {
                 Some(Command::Capture(byte)) => doorbell_firmware::diagnostic::command(&[byte]),
+                Some(Command::Bootsel) => embassy_rp::rom_data::reset_to_usb_boot(0, 0),
                 Some(Command::Info) => {
                     let mut public_key = heapless::String::<64>::new();
                     doorbell_firmware::credentials::write_hex(&self.public_key, &mut public_key)
@@ -44,6 +45,9 @@ pub fn init_logger(public_key: [u8; 32]) -> &'static UsbLogger<8192, Commands> {
     let logger = LOGGER.init(UsbLogger::with_custom_style(|record, writer| {
         // Keep PCM records intact when the other core logs ADC or network activity.
         critical_section::with(|_| {
+            if record.level() <= log::Level::Warn {
+                let _ = write!(writer, "[{}] ", record.level());
+            }
             let _ = write!(writer, "{}\r\n", record.args());
         });
     }));

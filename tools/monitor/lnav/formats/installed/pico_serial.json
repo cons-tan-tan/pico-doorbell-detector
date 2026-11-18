@@ -1,0 +1,23 @@
+{
+  "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+  "pico_serial": {
+    "title": "Pico USB serial",
+    "description": "Timestamped tio output from the Pico doorbell detector",
+    "regex": {
+      "standard": {
+        "pattern": "^\\r?\\[(?<timestamp>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+)\\] (?:(?:\\[(?<level>WARN|ERROR)\\]) )?(?<body>.*)$"
+      }
+    },
+    "timestamp-format": ["%Y-%m-%dT%H:%M:%S.%f"],
+    "level": {
+      "warning": "WARN",
+      "error": "ERROR"
+    },
+    "sample": [
+      {"line": "\r[2026-11-18T12:00:00.122] Connected to /dev/ttyACM0"},
+      {"line": "[2026-11-18T12:00:00.123] Scores background=99%; entrance=0%; door=1%"},
+      {"line": "[2026-11-18T12:00:00.124] Detected entrance"},
+      {"line": "[2026-11-18T12:00:00.125] [WARN] Audio gap", "level": "warning"}
+    ]
+  }
+}

@@ -131,6 +131,7 @@ pub fn write_hex(bytes: &[u8], output: &mut impl core::fmt::Write) -> core::fmt:
 
 pub enum Command {
     Info,
+    Bootsel,
     Capture(u8),
     Invalid,
 }
@@ -161,6 +162,7 @@ impl Commands {
         } else {
             match &self.line[..self.length] {
                 b"WIFI INFO" => Command::Info,
+                b"BOOTSEL" => Command::Bootsel,
                 b"" => {
                     return None;
                 }
@@ -254,5 +256,25 @@ mod tests {
             assert!(parser.push(*byte).is_none());
         }
         assert!(matches!(parser.push(b'\n'), Some(Command::Info)));
+    }
+
+    #[test]
+    fn bootsel_requires_a_complete_exact_command() {
+        let mut parser = Commands::default();
+        for byte in b"BOOTSEL" {
+            assert!(parser.push(*byte).is_none());
+        }
+        assert!(matches!(parser.push(b'\r'), Some(Command::Bootsel)));
+        assert!(parser.push(b'\n').is_none());
+        for line in [b"BOOTSEL extra".as_slice(), b"XBOOTSEL", b"bootsel"] {
+            for byte in line {
+                assert!(parser.push(*byte).is_none());
+            }
+            assert!(matches!(parser.push(b'\n'), Some(Command::Invalid)));
+        }
+        for byte in b"BOOTSEL" {
+            assert!(parser.push(*byte).is_none());
+        }
+        assert!(matches!(parser.push(b'\n'), Some(Command::Bootsel)));
     }
 }

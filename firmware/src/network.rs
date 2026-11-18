@@ -164,6 +164,8 @@ async fn send(stack: Stack<'_>, chime: Chime) -> Result<(), &'static str> {
         .write_all(request.as_bytes())
         .await
         .map_err(|_| "TCP write failed")?;
+    // Timestamp the local send before flush waits for the peer's TCP ACK.
+    log::info!("Notification request sent");
     socket.flush().await.map_err(|_| "TCP flush failed")?;
     let mut line = [0; 256];
     let mut length = 0;

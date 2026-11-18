@@ -22,16 +22,29 @@
           arm-none-eabi-size "$CARGO_TARGET_DIR/thumbv8m.main-none-eabihf/release/doorbell"
         '';
       };
-      flashScript = pkgs.writeText "flash-pico.ps1" ''
-        param([Parameter(Mandatory=$true)][string]$Source)
-        $ErrorActionPreference = 'Stop'
-        $targets = @(Get-Volume | Where-Object { $_.FileSystemLabel -eq 'RP2350' -and $_.DriveLetter })
-        if ($targets.Count -ne 1) {
-          throw "Connect exactly one Pico 2 W in BOOTSEL mode (found $($targets.Count))."
-        }
-        Copy-Item -LiteralPath $Source -Destination ($targets[0].DriveLetter + ':\')
-      '';
+      serialTools = [
+        pkgs.bash
+        pkgs.coreutils
+        pkgs.util-linux
+      ];
+      serialCommon = builtins.readFile ../tools/usb/serial-common.sh;
+      graphPython = pkgs.python3.withPackages (p: [ p.plotext ]);
+      graphViewer = pkgs.writeShellApplication {
+        name = "doorbell-graph";
+        runtimeInputs = [ pkgs.uv ];
+        text = ''
+          exec uv run --no-project --offline --python ${graphPython}/bin/python ${../tools/monitor/monitor_graph.py} "$@"
+        '';
+      };
+      bootToUsb = pkgs.writeShellApplication {
+        name = "doorbell-bootsel";
+        runtimeInputs = serialTools ++ [
+          pkgs.socat
+        ];
+        text = serialCommon + builtins.readFile ../tools/usb/bootsel.sh;
+      };
       runners = {
+        bootsel = bootToUsb;
         build = pkgs.writeShellApplication {
           name = "doorbell-build";
           runtimeInputs = [ buildFirmware ];
@@ -49,6 +62,7 @@
           runtimeInputs = [
             pkgs.coreutils
             buildFirmware
+            bootToUsb
           ];
           text = ''
             if [[ $# -gt 1 || ( "''${1:-dev}" != dev && "''${1:-dev}" != prod ) ]]; then
@@ -60,9 +74,20 @@
             export CARGO_TARGET_DIR="$PWD/firmware/target/build"
             doorbell-build-firmware "$@"
             install -m 600 "$CARGO_TARGET_DIR/firmware.uf2" firmware.uf2
-            script=$(wslpath -w '${flashScript}')
+            shopt -s nullglob
+            ports=(/dev/serial/by-id/usb-Raspberry_Pi_Pico_*-if00)
+            boot_args=()
+            if [[ ''${#ports[@]} -gt 1 ]]; then
+              printf 'Connect exactly one Pico before flashing.\n' >&2
+              exit 1
+            elif [[ ''${#ports[@]} -eq 1 ]]; then
+              serial=''${ports[0]##*_}
+              doorbell-bootsel "''${ports[0]}"
+              boot_args=(-SerialNumber "''${serial%-if00}")
+            fi
+            script=$(wslpath -w '${../tools/usb/flash.ps1}')
             source=$(wslpath -w "$PWD/firmware.uf2")
-            powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$script" -Source "$source"
+            powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$script" -Source "$source" "''${boot_args[@]}"
           '';
         };
         auto-attach = pkgs.writeShellApplication {
@@ -77,41 +102,24 @@
         };
         monitor = pkgs.writeShellApplication {
           name = "doorbell-monitor";
-          runtimeInputs = [
-            pkgs.coreutils
+          runtimeEnv = {
+            DOORBELL_LNAV_CONFIG = "${../tools/monitor/lnav}";
+            DOORBELL_TMUX_CONFIG = "${../tools/monitor/monitor.tmux.conf}";
+          };
+          runtimeInputs = serialTools ++ [
             pkgs.tio
+            pkgs.lnav
+            pkgs.tmux
+            graphViewer
           ];
-          text = ''
-            if [[ $# -gt 1 ]]; then
-              printf 'Usage: nix run .#monitor -- [serial-device]\n' >&2
-              exit 64
-            fi
-            if [[ $# -eq 1 ]]; then
-              device=$1
-            else
-              shopt -s nullglob
-              ports=(/dev/serial/by-id/usb-Raspberry_Pi_Pico_*-if00)
-              if [[ ''${#ports[@]} -ne 1 ]]; then
-                printf 'Specify a serial device; found %s matching Pico devices.\n' "''${#ports[@]}" >&2
-                exit 1
-              fi
-              device=''${ports[0]}
-            fi
-            if [[ ! -r "$device" || ! -w "$device" ]] \
-              && [[ " $(id -Gn) " != *" dialout "* ]] \
-              && [[ " $(id -Gn "$(id -un)") " == *" dialout "* ]]; then
-              export DOORBELL_MONITOR_DEVICE="$device"
-              # A Nix-store sg lacks the host's setuid wrapper needed to change groups.
-              exec sg dialout -c "exec ${pkgs.lib.getExe pkgs.tio} \"\$DOORBELL_MONITOR_DEVICE\""
-            fi
-            exec tio "$device"
-          '';
+          text = serialCommon + builtins.readFile ../tools/monitor/monitor.sh;
         };
         check = pkgs.writeShellApplication {
           name = "doorbell-check";
           runtimeInputs = firmwareTools ++ [
             pkgs.uv
             pkgs.ruff
+            pkgs.tmux
           ];
           runtimeEnv = firmwareEnv;
           text = ''
@@ -124,7 +132,12 @@
             export DOORBELL_MODE=dev
             cargo clippy --manifest-path firmware/Cargo.toml --locked --features device --target thumbv8m.main-none-eabihf -- -D warnings
             ${pkgs.lib.getExe buildFirmware} dev
-            ruff check firmware/tools
+            ruff check firmware/tools tools
+            uv run --no-project --offline --python ${graphPython}/bin/python tools/monitor/test_monitor_graph.py
+            uv run --no-project tools/monitor/test_serial.py ${pkgs.lib.getExe runners.monitor} ${pkgs.lib.getExe bootToUsb} -v
+            if command -v powershell.exe >/dev/null && command -v wslpath >/dev/null; then
+              powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(wslpath -w "$PWD/tools/usb/test_flash.ps1")"
+            fi
             requirements=$(uv export --script firmware/tools/encrypt_wifi.py --locked --format requirements-txt)
             uv run --no-project --with-requirements <(printf '%s\n' "$requirements") firmware/tools/test_encrypt_wifi.py
             cd ml
