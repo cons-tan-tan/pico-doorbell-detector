@@ -5,6 +5,7 @@ import pty
 import re
 import select
 import signal
+import socket
 import subprocess
 import sys
 import tempfile
@@ -187,6 +188,24 @@ class SerialRunners(unittest.TestCase):
         os.write(self.ui, b"q")
         self.wait_for(lambda: process.poll() is not None)
         self.assertEqual(process.returncode, 0)
+
+    def test_bootsel_keeps_reading_while_the_monitor_forwards_the_command(self):
+        self.request_bootsel()
+        address = next(self.root.rglob("*.lock")).with_suffix(".sock")
+        with socket.socket(socket.AF_UNIX) as server:
+            server.bind(str(address))
+            server.listen(1)
+            server.settimeout(3)
+            with subprocess.Popen(
+                [BOOTSEL, self.device], env=self.env, stdout=subprocess.DEVNULL
+            ) as request:
+                connection, _ = server.accept()
+                with connection, connection.makefile("rb") as command:
+                    connection.settimeout(3)
+                    self.assertEqual(command.read(), b"\nBOOTSEL\n")
+                    # tio can forward a serial log before finishing the USB write.
+                    connection.sendall(b"Scores background=99%; entrance=0%; door=1%\r\n")
+                self.assertEqual(request.wait(timeout=3), 0)
 
     def test_raw_mode_accepts_keyboard_and_control_socket(self):
         process = self.start_monitor("--raw")

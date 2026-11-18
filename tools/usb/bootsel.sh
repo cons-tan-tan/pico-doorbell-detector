@@ -6,8 +6,8 @@ select_serial "$@"
 serial_access
 serial_runtime
 
-# Reuse the receiver's connection so flashing also works while monitoring.
-if [[ -S "$socket" ]] && printf '\nBOOTSEL\n' | timeout 3 socat -u - "UNIX-CONNECT:$socket"; then
+# tio forwards one byte at a time. Keep reading its logs until it drains the command.
+if [[ -S "$socket" ]] && printf '\nBOOTSEL\n' | timeout 3 socat -t 2 - "UNIX-CONNECT:$socket" >/dev/null; then
   printf 'Requested BOOTSEL through the running monitor.\n'
   exit 0
 fi
