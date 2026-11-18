@@ -22,16 +22,21 @@
           arm-none-eabi-size "$CARGO_TARGET_DIR/thumbv8m.main-none-eabihf/release/doorbell"
         '';
       };
-      flashScript = pkgs.writeText "flash-pico.ps1" ''
-        param([Parameter(Mandatory=$true)][string]$Source)
-        $ErrorActionPreference = 'Stop'
-        $targets = @(Get-Volume | Where-Object { $_.FileSystemLabel -eq 'RP2350' -and $_.DriveLetter })
-        if ($targets.Count -ne 1) {
-          throw "Connect exactly one Pico 2 W in BOOTSEL mode (found $($targets.Count))."
-        }
-        Copy-Item -LiteralPath $Source -Destination ($targets[0].DriveLetter + ':\')
-      '';
+      serialTools = [
+        pkgs.bash
+        pkgs.coreutils
+        pkgs.util-linux
+      ];
+      serialCommon = builtins.readFile ../tools/usb/serial-common.sh;
+      bootToUsb = pkgs.writeShellApplication {
+        name = "doorbell-bootsel";
+        runtimeInputs = serialTools ++ [
+          pkgs.socat
+        ];
+        text = serialCommon + builtins.readFile ../tools/usb/bootsel.sh;
+      };
       runners = {
+        bootsel = bootToUsb;
         build = pkgs.writeShellApplication {
           name = "doorbell-build";
           runtimeInputs = [ buildFirmware ];
@@ -49,6 +54,7 @@
           runtimeInputs = [
             pkgs.coreutils
             buildFirmware
+            bootToUsb
           ];
           text = ''
             if [[ $# -gt 1 || ( "''${1:-dev}" != dev && "''${1:-dev}" != prod ) ]]; then
@@ -60,9 +66,20 @@
             export CARGO_TARGET_DIR="$PWD/firmware/target/build"
             doorbell-build-firmware "$@"
             install -m 600 "$CARGO_TARGET_DIR/firmware.uf2" firmware.uf2
-            script=$(wslpath -w '${flashScript}')
+            shopt -s nullglob
+            ports=(/dev/serial/by-id/usb-Raspberry_Pi_Pico_*-if00)
+            boot_args=()
+            if [[ ''${#ports[@]} -gt 1 ]]; then
+              printf 'Connect exactly one Pico before flashing.\n' >&2
+              exit 1
+            elif [[ ''${#ports[@]} -eq 1 ]]; then
+              serial=''${ports[0]##*_}
+              doorbell-bootsel "''${ports[0]}"
+              boot_args=(-SerialNumber "''${serial%-if00}")
+            fi
+            script=$(wslpath -w '${../tools/usb/flash.ps1}')
             source=$(wslpath -w "$PWD/firmware.uf2")
-            powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$script" -Source "$source"
+            powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$script" -Source "$source" "''${boot_args[@]}"
           '';
         };
         auto-attach = pkgs.writeShellApplication {
@@ -125,6 +142,9 @@
             cargo clippy --manifest-path firmware/Cargo.toml --locked --features device --target thumbv8m.main-none-eabihf -- -D warnings
             ${pkgs.lib.getExe buildFirmware} dev
             ruff check firmware/tools
+            if command -v powershell.exe >/dev/null && command -v wslpath >/dev/null; then
+              powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(wslpath -w "$PWD/tools/usb/test_flash.ps1")"
+            fi
             requirements=$(uv export --script firmware/tools/encrypt_wifi.py --locked --format requirements-txt)
             uv run --no-project --with-requirements <(printf '%s\n' "$requirements") firmware/tools/test_encrypt_wifi.py
             cd ml

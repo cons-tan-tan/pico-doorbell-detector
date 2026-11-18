@@ -19,6 +19,7 @@ impl ReceiverHandler for Commands {
             let command = self.parser.lock(|parser| parser.borrow_mut().push(*byte));
             match command {
                 Some(Command::Capture(byte)) => doorbell_firmware::diagnostic::command(&[byte]),
+                Some(Command::Bootsel) => embassy_rp::rom_data::reset_to_usb_boot(0, 0),
                 Some(Command::Info) => {
                     let mut public_key = heapless::String::<64>::new();
                     doorbell_firmware::credentials::write_hex(&self.public_key, &mut public_key)
