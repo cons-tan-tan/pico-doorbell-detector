@@ -3,3 +3,4 @@
 result
 firmware.uf2
 /artifacts/
+__pycache__/

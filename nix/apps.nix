@@ -28,6 +28,14 @@
         pkgs.util-linux
       ];
       serialCommon = builtins.readFile ../tools/usb/serial-common.sh;
+      graphPython = pkgs.python3.withPackages (p: [ p.plotext ]);
+      graphViewer = pkgs.writeShellApplication {
+        name = "doorbell-graph";
+        runtimeInputs = [ pkgs.uv ];
+        text = ''
+          exec uv run --no-project --offline --python ${graphPython}/bin/python ${../tools/monitor/monitor_graph.py} "$@"
+        '';
+      };
       bootToUsb = pkgs.writeShellApplication {
         name = "doorbell-bootsel";
         runtimeInputs = serialTools ++ [
@@ -94,41 +102,24 @@
         };
         monitor = pkgs.writeShellApplication {
           name = "doorbell-monitor";
-          runtimeInputs = [
-            pkgs.coreutils
+          runtimeEnv = {
+            DOORBELL_LNAV_CONFIG = "${../tools/monitor/lnav}";
+            DOORBELL_TMUX_CONFIG = "${../tools/monitor/monitor.tmux.conf}";
+          };
+          runtimeInputs = serialTools ++ [
             pkgs.tio
+            pkgs.lnav
+            pkgs.tmux
+            graphViewer
           ];
-          text = ''
-            if [[ $# -gt 1 ]]; then
-              printf 'Usage: nix run .#monitor -- [serial-device]\n' >&2
-              exit 64
-            fi
-            if [[ $# -eq 1 ]]; then
-              device=$1
-            else
-              shopt -s nullglob
-              ports=(/dev/serial/by-id/usb-Raspberry_Pi_Pico_*-if00)
-              if [[ ''${#ports[@]} -ne 1 ]]; then
-                printf 'Specify a serial device; found %s matching Pico devices.\n' "''${#ports[@]}" >&2
-                exit 1
-              fi
-              device=''${ports[0]}
-            fi
-            if [[ ! -r "$device" || ! -w "$device" ]] \
-              && [[ " $(id -Gn) " != *" dialout "* ]] \
-              && [[ " $(id -Gn "$(id -un)") " == *" dialout "* ]]; then
-              export DOORBELL_MONITOR_DEVICE="$device"
-              # A Nix-store sg lacks the host's setuid wrapper needed to change groups.
-              exec sg dialout -c "exec ${pkgs.lib.getExe pkgs.tio} \"\$DOORBELL_MONITOR_DEVICE\""
-            fi
-            exec tio "$device"
-          '';
+          text = serialCommon + builtins.readFile ../tools/monitor/monitor.sh;
         };
         check = pkgs.writeShellApplication {
           name = "doorbell-check";
           runtimeInputs = firmwareTools ++ [
             pkgs.uv
             pkgs.ruff
+            pkgs.tmux
           ];
           runtimeEnv = firmwareEnv;
           text = ''
@@ -141,7 +132,9 @@
             export DOORBELL_MODE=dev
             cargo clippy --manifest-path firmware/Cargo.toml --locked --features device --target thumbv8m.main-none-eabihf -- -D warnings
             ${pkgs.lib.getExe buildFirmware} dev
-            ruff check firmware/tools
+            ruff check firmware/tools tools
+            uv run --no-project --offline --python ${graphPython}/bin/python tools/monitor/test_monitor_graph.py
+            uv run --no-project tools/monitor/test_serial.py ${pkgs.lib.getExe runners.monitor} ${pkgs.lib.getExe bootToUsb} -v
             if command -v powershell.exe >/dev/null && command -v wslpath >/dev/null; then
               powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(wslpath -w "$PWD/tools/usb/test_flash.ps1")"
             fi

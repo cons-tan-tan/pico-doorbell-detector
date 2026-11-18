@@ -15,6 +15,7 @@
             firmwareTools
             ++ (with pkgs; [
               tio
+              lnav
               uv
               ruff
               nixfmt

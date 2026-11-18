@@ -45,6 +45,9 @@ pub fn init_logger(public_key: [u8; 32]) -> &'static UsbLogger<8192, Commands> {
     let logger = LOGGER.init(UsbLogger::with_custom_style(|record, writer| {
         // Keep PCM records intact when the other core logs ADC or network activity.
         critical_section::with(|_| {
+            if record.level() <= log::Level::Warn {
+                let _ = write!(writer, "[{}] ", record.level());
+            }
             let _ = write!(writer, "{}\r\n", record.args());
         });
     }));
