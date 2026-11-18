@@ -1,133 +1,97 @@
 # Pico Doorbell Detector
 
-Recognize doorbell chimes through a MAX9814 microphone on a Raspberry Pi Pico 2 W
-and send Wi-Fi notifications via [ntfy](https://docs.ntfy.sh/). Detection runs on
-the board using Rust and TFLite Micro; Python tools handle training on a PC.
-
-The included model targets the two chimes recorded for this installation.
-Capture, inference, and notifications have been checked on the device; accuracy
-in the installed room and long-term reliability still need evaluation.
+A Raspberry Pi Pico 2 W listens for doorbell chimes through a MAX9814 microphone
+and sends notifications over Wi-Fi using [ntfy](https://docs.ntfy.sh/). Its Rust
+firmware runs a TFLite Micro model trained for this installation's two chimes.
+Accuracy in the installed room still needs evaluation.
 
 ## Start developing
 
-Use Nix with flakes enabled on `x86_64-linux`. On NixOS, enable `nix-ld` for the
-Python runtime downloaded by uv. Run the commands below from the repository root:
+Use Nix flakes on `x86_64-linux` and run commands from the repository root.
+On NixOS, enable `nix-ld` for uv's Python runtime.
 
 ```sh
 nix develop
 nix run .#check
 ```
 
-The check command runs Rust and Python tests, lint checks, and a Pico firmware
-build. Builds and checks work without a board or 1Password access; any included
-Wi-Fi settings are already encrypted. Use `nix run .#build` for a firmware build alone.
+`check` runs hardware-independent tests, lint checks, and a firmware build.
+Use `nix run .#build` for the build alone.
 
 ## Run on a Pico
 
-The supplied flashing and USB attachment commands target NixOS-WSL with Windows
-PowerShell, `op.exe`, and usbipd-win available.
+The USB commands use NixOS-WSL, Windows PowerShell, and usbipd-win.
+Connect the MAX9814 analog output to GPIO26. For notifications, configure the
+static IP, gateway, DNS, and ntfy host for your network. [Network settings](firmware/src/network.rs) · [ntfy host](firmware/src/notification.rs)
 
 ### Flash
 
-Before the first flash:
-
-- Connect the MAX9814 microphone's analog output to GPIO26 on a Pico 2 W.
-- Set your static network configuration in [network.rs](firmware/src/network.rs)
-  and ntfy host in [notification.rs](firmware/src/notification.rs).
-
-Hold **BOOTSEL** while connecting the board over USB, then release it. Once the
-**RP2350** volume appears in Windows, run:
+For the first flash, hold **BOOTSEL** while connecting USB, then release it.
+Run this command in WSL once the **RP2350** drive appears in Windows.
 
 ```sh
 nix run .#flash
 ```
 
-This builds and writes the firmware, then reboots the board. Set up Wi-Fi once
-using the steps below; later flashes reuse the encrypted settings and device key.
-Subscribe to the `debug` topic on your configured ntfy server
-to receive alerts. Use `nix run .#flash -- prod` for the `doorbell` topic.
-Without Wi-Fi settings, capture and detection run with notifications disabled.
+Later flashes enter BOOTSEL automatically, even with the monitor open. Repeat
+the button procedure if the firmware stops responding. With the Pico attached
+to WSL, `nix run .#bootsel` enters the bootloader on demand.
 
 ### Monitor
 
-For the first connection, enable `wsl.usbip.enable` and add your user to `dialout`
-in the NixOS system configuration, then apply it. These are system settings;
-entering the development shell does not configure USB access.
-
-After the board reboots into normal mode, share it from an **elevated Windows
-terminal**. Find the Pico's bus ID, then bind that device:
+Enable `wsl.usbip.enable`, add your user to `dialout`, and apply the NixOS
+configuration. After the first flash, open **PowerShell as administrator** and
+bind the Pico once, using its normal-mode bus ID in place of `BUS_ID`.
 
 ```powershell
 usbipd list
-usbipd bind --busid <bus-id>
+usbipd bind --busid BUS_ID
 ```
 
-Run USB attachment in one WSL terminal:
-
-```sh
-nix run .#auto-attach
-```
-
-Read the serial logs in another WSL terminal, also at the repository root:
+Leave `nix run .#auto-attach` running in one WSL terminal so USB reconnects
+after flashing. In a second WSL terminal, start the monitor.
 
 ```sh
 nix run .#monitor
 ```
 
+The top pane shows the last 60 seconds of `background`, `entrance`, and `door`
+scores as percentages. A yellow line marked `N` shows when the Pico sent a
+notification request, including retries. In the log pane below, `Ctrl+F` toggles
+periodic metrics, `/` searches, and `q` quits. To reopen a saved log in the
+development shell, run `lnav -I tools/monitor/lnav artifacts/monitor/FILE.log`.
+
 ### Set up Wi-Fi
 
-After the first flash, type `WIFI INFO` and press Enter in the monitor. Copy the
-64-digit public key it returns. Configure the item references in
-[secretspec.toml](secretspec.toml), enable Windows 1Password CLI integration, and run:
+Detection works offline. For notifications, close the monitor and run
+`nix run .#monitor -- --raw`. Enter `WIFI INFO`, copy the 64-digit hex public
+key, then press `Ctrl+T` followed by `q` to exit.
+
+Enable Windows 1Password CLI integration (`op.exe`) and configure the item
+references in [secretspec.toml](secretspec.toml). In the development shell,
+substitute the Pico's public key and flash the encrypted settings.
 
 ```sh
-nix develop
-uv run --script --locked firmware/tools/encrypt_wifi.py --public-key <public-key>
+uv run --script --locked firmware/tools/encrypt_wifi.py --public-key YOUR_PUBLIC_KEY
+nix run .#flash
 ```
 
-The script retrieves credentials through SecretSpec and writes only the public
-key and encrypted settings to `firmware/settings/wifi.json`. Keep this file in
-Git, then flash again. Builds and subsequent flashes need no vault access.
+Keep the encrypted `firmware/settings/wifi.json` in Git. To update credentials
+on the same board, omit `--public-key`. Repeat setup after replacing the board
+or fully erasing flash. [Credential handling](docs/design-doc/rust-firmware.md#credential-handling)
 
-To update credentials, rerun the script without `--public-key`; it reuses the key
-in the saved file. A replacement board or a full flash erase requires a new key
-and re-encryption. The [credential design](docs/design-doc/rust-firmware.md#credential-handling)
-describes the protection boundary.
+Subscribe to the `debug` topic on your ntfy server. Use `nix run .#flash -- prod`
+for the `doorbell` topic.
 
 ## Train a model
 
-The included model is ready to build and flash. To train a new candidate, enter
-`nix develop` at the repository root and run:
+To train a new candidate, run these commands in the development shell with a
+fresh output directory.
 
 ```sh
 uv run --project ml --locked -m doorbell_ml prepare-data
 uv run --project ml --locked -m doorbell_ml retrain --output artifacts/runs/my-run
 ```
 
-Preparation verifies the retained training audio and downloads missing public
-backgrounds. [training.toml](ml/training.toml) defines the CPU training recipe;
-CUDA, phone originals, and previous models are not required. Choose a new output
-directory for each run.
-
-The candidate appears in `artifacts/runs/my-run/candidate`. Follow the
-[evaluation policy](docs/design-doc/learned-doorbell-detection.md#model-selection-and-evaluation)
-before replacing the deployed model. Training leaves `firmware/model/` unchanged.
-For evaluation and export commands, use
-`uv run --project ml --locked -m doorbell_ml --help`.
-
-## Repository and design
-
-| Location | Purpose |
-| --- | --- |
-| [firmware/](firmware/) | Rust firmware, C++ inference glue, and the deployed model bundle. |
-| [ml/](ml/) | Python training and evaluation, tests, dependency lock, and training settings. |
-| [data/](data/) | Prepared recordings, synthetic audio, public-source manifests, and download cache. |
-| [nix/](nix/) | Shared development environment and build, flash, and monitor commands. |
-| `artifacts/` | Local experiment outputs and measurements; ignored by Git. |
-
-Design docs explain the choices and trade-offs:
-
-- [Learned doorbell detection](docs/design-doc/learned-doorbell-detection.md):
-  recognition, training data, model selection, and evidence limits.
-- [Rust firmware](docs/design-doc/rust-firmware.md): hardware, runtime architecture,
-  model updates, and credential handling.
+Evaluate `artifacts/runs/my-run/candidate` before replacing the deployed model.
+[Training recipe](ml/training.toml) · [Evaluation criteria](docs/design-doc/learned-doorbell-detection.md#model-selection-and-evaluation)
